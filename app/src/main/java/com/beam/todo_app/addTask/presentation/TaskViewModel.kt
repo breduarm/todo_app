@@ -23,4 +23,15 @@ class TaskViewModel @Inject constructor() : ViewModel() {
         _tasks.add(TaskModel(description = task))
         manageDialog(show = false)
     }
+
+    fun markTask(task: TaskModel) {
+        val isSelected = task.selected
+        val index = _tasks.indexOf(task)
+        _tasks[index] = _tasks[index].copy(selected = !isSelected)
+    }
+
+    fun removeTask(task: TaskModel) {
+        val taskToRemove = _tasks.first { task.id == it.id }
+        _tasks.remove(taskToRemove)
+    }
 }

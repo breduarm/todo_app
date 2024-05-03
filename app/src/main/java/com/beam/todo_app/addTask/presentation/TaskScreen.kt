@@ -1,6 +1,7 @@
 package com.beam.todo_app.addTask.presentation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,7 +47,9 @@ fun TaskScreen(viewModel: TaskViewModel) {
         tasks = tasks,
         showDialog = showDialog,
         manageDialog = { viewModel.manageDialog(it) },
-        createTask = { viewModel.createTask(it) }
+        createTask = { viewModel.createTask(it) },
+        markTask = { viewModel.markTask(it) },
+        removeTask = { viewModel.removeTask(it) },
     )
 }
 
@@ -54,15 +58,21 @@ fun TaskScreenContent(
     tasks: List<TaskModel>,
     showDialog: Boolean,
     manageDialog: (Boolean) -> Unit,
-    createTask: (String) -> Unit
+    createTask: (String) -> Unit,
+    markTask: (TaskModel) -> Unit,
+    removeTask: (TaskModel) -> Unit,
 ) {
-    Box(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp)
+    ) {
         AddTaskDialog(
             showDialog,
             onDismiss = { manageDialog(false) },
             onAddTask = { createTask(it) }
         )
-        TaskList(tasks)
+        TaskList(tasks, markTask, removeTask)
         FABDialog(modifier = Modifier.align(Alignment.BottomEnd)) {
             manageDialog(true)
         }
@@ -119,24 +129,36 @@ fun FABDialog(modifier: Modifier, onClick: () -> Unit) {
 }
 
 @Composable
-fun TaskList(tasks: List<TaskModel>) {
+fun TaskList(
+    tasks: List<TaskModel>,
+    markTask: (TaskModel) -> Unit,
+    removeTask: (TaskModel) -> Unit,
+) {
     LazyColumn {
         items(tasks, key = { it.id }) { task ->
-            TaskItem(task = task)
+            TaskItem(task = task, onCheckedChange = markTask, onLongPress = removeTask)
         }
     }
 }
 
 @Composable
-fun TaskItem(task: TaskModel) {
-    Column {
+fun TaskItem(
+    task: TaskModel,
+    onCheckedChange: (TaskModel) -> Unit,
+    onLongPress: (TaskModel) -> Unit,
+) {
+    Column(
+        modifier = Modifier.pointerInput(Unit) {
+            detectTapGestures(onLongPress = { onLongPress(task) })
+        }
+    ) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = task.description, modifier = Modifier
                     .weight(1f)
                     .padding(12.dp)
             )
-            Checkbox(checked = task.selected, onCheckedChange = { /* TODO */ })
+            Checkbox(checked = task.selected, onCheckedChange = { onCheckedChange(task) })
         }
         Divider(modifier = Modifier.height(1.dp))
     }
@@ -150,5 +172,7 @@ fun TaskScreenPreview() {
         showDialog = false,
         manageDialog = {},
         createTask = {},
+        markTask = {},
+        removeTask = {},
     )
 }
