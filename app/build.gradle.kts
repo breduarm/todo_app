@@ -78,4 +78,10 @@ dependencies {
 
     // LiveData
     implementation(libs.androidx.runtime.livedata)
+
+    // Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    //noinspection KaptUsageInsteadOfKsp
+    kapt(libs.androidx.room.compiler)
 }
