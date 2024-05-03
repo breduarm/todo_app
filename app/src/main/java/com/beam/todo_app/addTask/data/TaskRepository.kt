@@ -18,4 +18,8 @@ class TaskRepository @Inject constructor(
     suspend fun create(task: TaskModel) {
         taskDao.createTask(task.toEntity())
     }
+
+    suspend fun update(task: TaskModel) {
+        taskDao.updateTask(task.toEntity())
+    }
 }

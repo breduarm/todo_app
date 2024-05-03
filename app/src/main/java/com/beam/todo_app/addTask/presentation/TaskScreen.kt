@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -25,32 +26,58 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
+import com.beam.todo_app.addTask.presentation.TaskUiState.Error
+import com.beam.todo_app.addTask.presentation.TaskUiState.Loading
+import com.beam.todo_app.addTask.presentation.TaskUiState.Success
 import com.beam.todo_app.addTask.presentation.model.TaskModel
 
 @Composable
 fun TaskScreen(viewModel: TaskViewModel) {
     val showDialog: Boolean by viewModel.showDialog.observeAsState(initial = false)
-    val tasks: List<TaskModel> = viewModel.tasks
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
 
-    TaskScreenContent(
-        tasks = tasks,
-        showDialog = showDialog,
-        manageDialog = { viewModel.manageDialog(it) },
-        createTask = { viewModel.createTask(it) },
-        markTask = { viewModel.markTask(it) },
-        removeTask = { viewModel.removeTask(it) },
-    )
+    val uiState by produceState<TaskUiState>(
+        initialValue = Loading,
+        key1 = lifecycle,
+        key2 = viewModel,
+    ) {
+        lifecycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
+            viewModel.uiState.collect { value = it }
+        }
+    }
+
+    when(uiState) {
+        Loading -> {
+            CircularProgressIndicator()
+        }
+        is Error -> TODO()
+        is Success -> {
+            val currentUiState = uiState as Success
+            TaskScreenContent(
+                tasks = currentUiState.tasks,
+                showDialog = showDialog,
+                manageDialog = { viewModel.manageDialog(it) },
+                createTask = { viewModel.createTask(it) },
+                markTask = { viewModel.markTask(it) },
+                removeTask = { viewModel.removeTask(it) },
+            )
+        }
+    }
 }
 
 @Composable
