@@ -7,11 +7,7 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.ViewModel
 import com.beam.todo_app.addTask.presentation.TaskScreen
 import com.beam.todo_app.addTask.presentation.TaskViewModel
 import com.beam.todo_app.ui.theme.Todo_appTheme
@@ -31,7 +27,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    TaskScreen()
+                    TaskScreen(taskViewModel)
                 }
             }
         }

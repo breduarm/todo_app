@@ -75,4 +75,7 @@ dependencies {
     // DI
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
+
+    // LiveData
+    implementation(libs.androidx.runtime.livedata)
 }
