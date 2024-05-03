@@ -1,16 +1,16 @@
 package com.beam.todo_app.addTask.presentation
 
-import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.beam.todo_app.addTask.domain.AddTasksUseCase
+import com.beam.todo_app.addTask.domain.DeleteTaskUseCase
 import com.beam.todo_app.addTask.domain.GetTasksUseCase
 import com.beam.todo_app.addTask.domain.UpdateTasksUseCase
-import com.beam.todo_app.addTask.presentation.TaskUiState.Success
 import com.beam.todo_app.addTask.presentation.TaskUiState.Error
 import com.beam.todo_app.addTask.presentation.TaskUiState.Loading
+import com.beam.todo_app.addTask.presentation.TaskUiState.Success
 import com.beam.todo_app.addTask.presentation.model.TaskModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,6 +26,7 @@ class TaskViewModel @Inject constructor(
     getTasksUseCase: GetTasksUseCase,
     private val addTasksUseCase: AddTasksUseCase,
     private val updateTasksUseCase: UpdateTasksUseCase,
+    private val deleteTaskUseCase: DeleteTaskUseCase,
 ) : ViewModel() {
 
     val uiState: StateFlow<TaskUiState> = getTasksUseCase()
@@ -35,9 +36,6 @@ class TaskViewModel @Inject constructor(
 
     private val _showDialog = MutableLiveData<Boolean>()
     val showDialog: LiveData<Boolean> = _showDialog
-
-//    private val _tasks = mutableStateListOf<TaskModel>()
-//    val tasks: List<TaskModel> = _tasks
 
     fun manageDialog(show: Boolean) {
         _showDialog.value = show
@@ -57,7 +55,8 @@ class TaskViewModel @Inject constructor(
     }
 
     fun removeTask(task: TaskModel) {
-//        val taskToRemove = _tasks.first { task.id == it.id }
-//        _tasks.remove(taskToRemove)
+        viewModelScope.launch {
+            deleteTaskUseCase(task)
+        }
     }
 }
